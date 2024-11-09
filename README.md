@@ -3,7 +3,7 @@ Project 3: Interactive Visualization
 
 For our project, we created an interactive plot using the Bight 18 Sediment Toxicity Water Quality dataset from The Southern California Coastal Water Research Project (SCCWRP).
 
-The dataset is available on this Github page as well as <a href=https://dataportal.sccwrp.org/datasets/sccwrp::bight-18-sediment-toxicity-water-quality/explore>here</a>
+The dataset is available on this Github page as well as <a href=https://dataportal.sccwrp.org/datasets/sccwrp::bight-18-sediment-toxicity-water-quality/explore>here</a>.
 
 We chose to display pH levels recorded at various sites within Bight 18 over various timepoints (which was a feature in the data ranging from -10 to 10. This was achieved using a dot plot, and one or more site readings can be toggled on and off using a drop-down menu which allows users of the plot to select one or more sites to display pH readings recorded at different time points. We experimented with a few different variations of dot plots and line plots, but ultimately setted on the dot plots as we felt it was most easy to interpret. We also felt that it made sense to encode the sites as different colors, such that when different pH readings of sites were overlaid on each other, it would be easier to distinguish between them. In addition to the dropdown to select sites, we also felt that using a tooltip on mouseover to display pH reading and timepoint would also be useful to users of our visualization.
 
