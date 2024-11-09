@@ -1,4 +1,10 @@
 # Project3
+8-Nov-2024
+
+Mengkong Aun
+Alison Cher
+Sean Deering
+
 Project 3: Interactive Visualization
 
 For our project, we created an interactive plot using the Bight 18 Sediment Toxicity Water Quality dataset from The Southern California Coastal Water Research Project (SCCWRP).
