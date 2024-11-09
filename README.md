@@ -5,8 +5,6 @@ Mengkong Aun,
 Alison Cher,
 and Sean Deering
 
-Project 3: Interactive Visualization
-
 For our project, we created an interactive plot using the Bight 18 Sediment Toxicity Water Quality dataset from The Southern California Coastal Water Research Project (SCCWRP).
 
 A bight is a long, gradual bend or recess in the shoreline that forms a large, open bay. Bight 18 is one such region of Southern California that spans from San Diego to Los Angeles.
