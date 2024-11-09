@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toggle Station Points on pH Plot</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    .tooltip {
+      position: absolute;
+      background-color: white;
+      border: 1px solid #ccc;
+      padding: 5px;
+      border-radius: 4px;
+      pointer-events: none;
+      opacity: 0;
+    }
+    .title {
+     text-align: left;  /* Align text to the left */
+     font-size: 20px;
+     font-weight: bold;
+     margin-top: 10px;
+     margin-left: 250px; /* Adjust this value to shift the title */
+    }
+    
+    .dropdown-container {
+      text-align: center;
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .dropdown-label {
+      margin-right: 10px;
+      font-size: 16px;
+    }
+    .dropdown {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  </style>
+</head>
+<body>
+  <div class="title">California Bight 18 water pH readings over time by Station ID</div>
+
+  <svg width="900" height="500"></svg> <!-- Increased width of SVG -->
+
+  <!-- Dropdown for selecting stations -->
+  <div class="dropdown-container">
+    <label class="dropdown-label" for="stationDropdown">Select Station(s):<br>Command+click to select multiple. </label>
+    <select id="stationDropdown" multiple size="10">
+      <!-- Options will be populated by JavaScript -->
+    </select>
+  </div>
+
+  <script>
+    // Load data
+    d3.csv("./Bight_2018_Regional_Survey_Toxicity_WQ_3415747507237289127.csv").then(data => {
+      // Parse numerical values
+      data.forEach(d => {
+        d.timepoint = +d.timepoint;
+        d.result = +d.result;
+      });
+
+      // Filter for parameter 'pH'
+      data = data.filter(d => d.parameter === "pH");
+
+      // Remove any data points where the pH value is outside the normal range (0 - 14)
+      data = data.filter(d => d.result >= 0 && d.result <= 14);
+
+      // Group the data by station
+      const stations = d3.group(data, d => d.stationid);
+
+      createDotPlot(stations);
+    });
+
+    function createDotPlot(stations) {
+      const svg = d3.select("svg"),
+            width = 900, // Updated width
+            height = 500,
+            margin = { top: 50, right: 30, bottom: 60, left: 60 };
+
+      // Extract all timepoints, including negative timepoints
+      const timepoints = [...stations.values()].flat().map(d => d.timepoint).sort(d3.ascending);
+
+      // Adjust x scale to handle both negative and positive timepoints
+      const x = d3.scaleLinear()
+                  .domain([d3.min(timepoints) - 1, d3.max(timepoints) + 1]) // Ensuring domain includes all timepoints
+                  .range([margin.left, width - margin.right]);
+
+      // Adjust the y-axis to focus on pH range (0 - 14)
+      const y = d3.scaleLinear()
+                  .domain([0, 14]) // pH typically ranges from 0 to 14
+                  .range([height - margin.bottom, margin.top]);
+
+      // Color scale for the stations (unique color for each station)
+      const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+      // Clear the SVG canvas before redrawing
+      svg.selectAll("*").remove();
+
+      // Add axes
+      svg.append("g")
+         .attr("transform", `translate(0,${height - margin.bottom})`)
+         .call(d3.axisBottom(x));
+
+      svg.append("g")
+         .attr("transform", `translate(${margin.left},0)`)
+         .call(d3.axisLeft(y));
+
+      // Add axis labels
+
+      // X axis label
+      svg.append("text")
+         .attr("x", width / 2)
+         .attr("y", height - 5)
+         .style("text-anchor", "middle")
+         .text("Timepoint");
+
+      // Y axis label (centered)
+      svg.append("text")
+         .attr("transform", "rotate(-90)")   // Rotate the label to make it vertical
+         .attr("x", -height / 2)             // Position it in the center of the height
+         .attr("y", 15)                      // Adjust for spacing
+         .style("text-anchor", "middle")     // Center the text horizontally
+         .text("pH");
+
+      // Tooltip for displaying information about station and result
+      const tooltip = d3.select("body").append("div")
+                        .attr("class", "tooltip")
+                        .style("opacity", 0);
+
+      // Store the dot elements for each station
+      const stationDots = {};
+
+      // Draw dots for each station
+      stations.forEach((stationData, stationId) => {
+        stationDots[stationId] = svg.selectAll(`.dot-${stationId}`)
+            .data(stationData)
+            .enter().append("circle")
+            .attr("class", `dot dot-${stationId}`)
+            .attr("cx", d => x(d.timepoint)) // Map timepoint to x scale
+            .attr("cy", d => y(d.result))     // Map result to y scale
+            .attr("r", 5) // Size of the dot
+            .attr("fill", color(stationId)) // Use color for the station (unique color per station)
+            .style("opacity", 0) // Start with hidden dots
+            .on("mouseover", function(event, d) {
+              tooltip.transition().duration(200).style("opacity", .9);
+              tooltip.html(`pH: ${d.result} ${d.resultunits} at timepoint ${d.timepoint}`) 
+                     .style("left", `${event.pageX + 5}px`)
+                     .style("top", `${event.pageY - 28}px`);
+            })
+            .on("mouseout", function() {
+              tooltip.transition().duration(500).style("opacity", 0);
+            });
+
+        // Create an option for each station in the dropdown
+        d3.select("#stationDropdown")
+          .append("option")
+          .attr("value", stationId)
+          .text(`Station ${stationId}`);
+      });
+
+      // Add event listener for the station selection
+      d3.select("#stationDropdown").on("change", function() {
+        const selectedStations = Array.from(this.selectedOptions, option => option.value);
+
+        // Update the opacity of the dots based on the selected stations
+        Object.keys(stationDots).forEach(stationId => {
+          const opacity = selectedStations.includes(stationId) ? 1 : 0;
+          stationDots[stationId].style("opacity", opacity);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
