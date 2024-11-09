@@ -1,9 +1,9 @@
 # DSC 209R Project3: Interactive Visualization
 8-Nov-2024
 
-Mengkong Aun
-Alison Cher
-Sean Deering
+Mengkong Aun,
+Alison Cher,
+and Sean Deering
 
 Project 3: Interactive Visualization
 
