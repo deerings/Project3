@@ -1,4 +1,4 @@
-# Project3
+# DSC 209R Project3: Interactive Visualization
 8-Nov-2024
 
 Mengkong Aun
